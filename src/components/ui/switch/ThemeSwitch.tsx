@@ -1,8 +1,11 @@
 import styled from "@emotion/styled";
-import { Switch } from "@mui/material";
+import { Switch, Theme } from "@mui/material";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const ThemeSwitch = styled(Switch)(({ theme }: { theme: any }) => ({
+interface ThemeSwitchProps {
+  theme: Theme;
+}
+
+export const ThemeSwitch = styled(Switch)<ThemeSwitchProps>(({ theme }) => ({
   width: 62,
   height: 34,
   padding: 7,
