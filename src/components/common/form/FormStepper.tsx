@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import { Formik, Form, useFormikContext } from "formik";
 import { Stepper, Step, StepLabel, Button, Box } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
+import { resetForm, updateForm } from "@/store/slices/formSlice";
 import { TabConfig, formType } from "@/types/form.types";
 import {
   generateValidationSchemas,
   generateInitialValues,
 } from "@/utils/form.utils";
 import { RootState } from "@/store/store";
-import { resetForm, updateForm } from "@/store/slices/formSlice";
 import DynamicFormField from "./DynamicFormField";
 
 const AutoSave = () => {
@@ -34,19 +34,12 @@ const AutoSave = () => {
   return null;
 };
 
-/**
- * FormStepper component renders a form with a stepper to navigate through different steps.
- * @param {object} props - Component props.
- * @param {TabConfig<T>[]} props.tabs - Configuration of form tabs.
- * @param {string} props.bucketName - Name of the bucket.
- * @param {(request: T) => void} props.submit - Function to handle form submission.
- * @returns {JSX.Element} FormStepper component.
- */
 export const FormStepper = <T extends formType>({
   tabs,
   submit,
 }: {
   tabs: TabConfig<T>[];
+  bucketName?: string;
   submit: (request: T) => void;
 }) => {
   const dispatch = useDispatch();
@@ -55,6 +48,12 @@ export const FormStepper = <T extends formType>({
   const savedFormData = useSelector((state: RootState) => state.form.formData);
   const validationSchemas = generateValidationSchemas<T>(tabs);
   const initialValues = generateInitialValues<T>(tabs, savedFormData);
+
+  const handleResetForm = async () => {
+    await dispatch(resetForm());
+    setActiveStep(0);
+    window.location.reload();
+  };
 
   return (
     <Formik
@@ -65,7 +64,6 @@ export const FormStepper = <T extends formType>({
           setActiveStep((prev) => prev + 1);
           dispatch(updateForm(values));
         } else {
-          dispatch(resetForm());
           try {
             submit(values);
           } catch (error) {
@@ -80,12 +78,11 @@ export const FormStepper = <T extends formType>({
         <Form>
           <AutoSave />
           <Stepper activeStep={activeStep} alternativeLabel>
-            {tabs.length > 1 &&
-              tabs.map((tab, index) => (
-                <Step key={index}>
-                  <StepLabel>{tab.tabName}</StepLabel>
-                </Step>
-              ))}
+            {tabs.map((tab, index) => (
+              <Step key={index}>
+                <StepLabel>{tab.tabName}</StepLabel>
+              </Step>
+            ))}
           </Stepper>
 
           <Box sx={{ mt: 2 }}>
@@ -97,25 +94,14 @@ export const FormStepper = <T extends formType>({
           </Box>
 
           <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-            {tabs.length > 1 && (
-              <Button
-                disabled={activeStep === 0}
-                onClick={() => setActiveStep((prev) => prev - 1)}
-              >
-                Back
-              </Button>
-            )}
-
             <Button
-              type="submit"
-              sx={{
-                mt: 2,
-                mx: "auto",
-                display: tabs.length < 2 ? "block" : "inline-block",
-              }}
+              disabled={activeStep === 0}
+              onClick={() => setActiveStep((prev) => prev - 1)}
             >
-              {isLastStep ? "Submit" : "Next"}
+              Back
             </Button>
+            <Button onClick={handleResetForm}>Reset</Button>
+            <Button type="submit">{isLastStep ? "Generate" : "Next"}</Button>
           </Box>
         </Form>
       )}
