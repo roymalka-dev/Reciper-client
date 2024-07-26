@@ -101,7 +101,7 @@ export const FormStepper = <T extends formType>({
               Back
             </Button>
             <Button onClick={handleResetForm}>Reset</Button>
-            <Button type="submit">{isLastStep ? "Generate" : "Next"}</Button>
+            <Button type="submit">{isLastStep ? "Sign in" : "Next"}</Button>
           </Box>
         </Form>
       )}
